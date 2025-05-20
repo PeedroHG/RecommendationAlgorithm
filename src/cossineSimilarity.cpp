@@ -15,14 +15,12 @@ float cossineSimilarity(const std::unordered_map<int, float>& user1, const std::
     // Para calcular a norma, usamos a fórmula ||A|| = sqrt(A1^2 + A2^2 + ... + An^2), onde Ai é o rating do filme i dado pelo usuário A.
     // O produto escalar é calculado como A . B = A1*B1 + A2*B2 + ... + An*Bn, onde Ai e Bi são os ratings do filme i dados pelos usuários A e B, respectivamente.
 
-
-
     float dotProduct = 0.0f;
     float normA = 0.0f;
     float normB = 0.0f;
 
-    for (const auto& [movie, rating] : user1) {
-        if (user2.find(movie) != user2.end()) {
+    for (const auto& [movie, rating] : user1) { // Itera sobre os ratings e filmes  do usuário 1
+        if (user2.find(movie) != user2.end()) { // Verifica se o filme também está presente no usuário 2
             dotProduct += rating * user2.at(movie);
         }
         normA += rating * rating;
