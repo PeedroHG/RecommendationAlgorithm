@@ -23,25 +23,26 @@ UserItemMatrix convertToUserItemMatrix(const UserRatingsLog& users_ratings_log) 
 
 UserNormsMap computeUserNorms(const UserItemMatrix& user_item_matrix) {
     UserNormsMap norms_map;
-    std::vector<std::pair<int, const std::unordered_map<int, float>*>> user_entries_vec;
-    user_entries_vec.reserve(user_item_matrix.size());
+    norms_map.reserve(user_item_matrix.size());
+
+    std::vector<int> user_ids;
+    user_ids.reserve(user_item_matrix.size());
     for (const auto& pair : user_item_matrix) {
-        user_entries_vec.push_back({pair.first, &pair.second});
+        user_ids.push_back(pair.first);
     }
-    std::vector<std::pair<int, float>> norms_results_vec(user_entries_vec.size());
+
+    std::vector<float> norms(user_ids.size());
+    
     #pragma omp parallel for schedule(dynamic)
-    for (size_t i = 0; i < user_entries_vec.size(); ++i) {
-        const auto& user_id = user_entries_vec[i].first;
-        const auto& ratings = *(user_entries_vec[i].second);
-        float sum_of_squares = 0.0f;
-        for (const auto& rating_entry : ratings) {
-            sum_of_squares += rating_entry.second * rating_entry.second;
-        }
-        norms_results_vec[i] = {user_id, std::sqrt(sum_of_squares)};
+    for (size_t i = 0; i < user_ids.size(); ++i) {
+        const auto& ratings = user_item_matrix.at(user_ids[i]);
+        float sum = 0.0f;
+        for (const auto& r : ratings) sum += r.second * r.second;
+        norms[i] = std::sqrt(sum);
     }
-    norms_map.reserve(norms_results_vec.size());
-    for (const auto& pair : norms_results_vec) {
-        norms_map[pair.first] = pair.second;
+
+    for (size_t i = 0; i < user_ids.size(); ++i) {
+        norms_map[user_ids[i]] = norms[i];
     }
     return norms_map;
 }
@@ -59,7 +60,7 @@ float calculateCosineSimilarity(const std::unordered_map<int, float>& ratings_us
             auto it_b = ratings_user_b.find(rating_entry_a.first);
             if (it_b != ratings_user_b.end()) {
                 dot_product += rating_entry_a.second * it_b->second;
-            }
+            }   
         }
     } else {
         for (const auto& rating_entry_b : ratings_user_b) {
@@ -109,17 +110,16 @@ LSHHashValue computeLSHHash(const std::unordered_map<int, float>& user_ratings,
         for (const auto& rating_entry : user_ratings) {
             int movie_id = rating_entry.first;
             float rating = rating_entry.second;
-            
             auto it_idx = movie_to_idx.find(movie_id);
             if (it_idx != movie_to_idx.end()) {
                 int dense_idx = it_idx->second;
-                if (dense_idx < static_cast<int>(plane.size())) { // Checagem de limite
+                if (dense_idx < static_cast<int>(plane.size())) {
                     dot_product += rating * plane[dense_idx];
                 }
             }
         }
         if (dot_product >= 0) {
-            hash |= (1ULL << i); // Define o i-ésimo bit
+            hash |= (1ULL << i);
         }
     }
     return hash;
@@ -159,8 +159,11 @@ void buildLSHTables(const UserItemMatrix& user_item_matrix,
         const auto& current_hyperplane_set = all_hyperplane_sets[table_idx];
         LSHBucketMap& current_bucket_map = lsh_tables[table_idx];
 
-        // Estrutura temporária para armazenar (hash, user_id) para evitar locks no loop principal
-        std::vector<std::vector<std::pair<LSHHashValue, int>>> thread_local_hashes(omp_get_max_threads());
+        int n_threads = 1;
+        #ifdef _OPENMP
+        n_threads = omp_get_max_threads();
+        #endif
+        std::vector<std::vector<std::pair<LSHHashValue, int>>> thread_local_hashes(n_threads);
 
         #pragma omp parallel for schedule(dynamic)
         for (size_t i = 0; i < user_matrix_vec.size(); ++i) {
@@ -199,7 +202,7 @@ NeighborList findApproximateKNearestNeighborsLSH(
         std::cerr << "Warning: Target user " << target_user_id << " not found for LSH KNN." << std::endl;
         return {};
     }
-    const auto& target_ratings = it_target_user_ratings->second;
+    const auto& target_ratings = it_target_user_ratings->second; // O campo .second desse iterador contém o mapa de avaliações desse usuário, onde cada chave é o ID de um filme e o valor é a nota dada.
     float target_norm = user_norms.at(target_user_id);
 
     std::set<int> candidate_user_ids; // Usar std::set para obter candidatos únicos automaticamente
@@ -220,14 +223,28 @@ NeighborList findApproximateKNearestNeighborsLSH(
     }
 
     NeighborList potential_neighbors;
-    for (int candidate_id : candidate_user_ids) {
+    std::vector<int> candidate_vec(candidate_user_ids.begin(), candidate_user_ids.end());
+    std::vector<std::pair<int, float>> local_neighbors(candidate_vec.size());
+
+#pragma omp parallel for schedule(dynamic)
+    for (size_t i = 0; i < candidate_vec.size(); ++i) {
+        int candidate_id = candidate_vec[i];
         auto it_candidate_ratings = user_item_matrix.find(candidate_id);
         if (it_candidate_ratings != user_item_matrix.end()) {
             float candidate_norm = user_norms.at(candidate_id);
             float similarity = calculateCosineSimilarity(target_ratings, it_candidate_ratings->second, target_norm, candidate_norm);
-            if (similarity > 0.0f) { // Considera apenas similaridade positiva
-                potential_neighbors.emplace_back(candidate_id, similarity);
+            if (similarity > 0.0f) {
+                local_neighbors[i] = std::make_pair(candidate_id, similarity);
+            } else {
+                local_neighbors[i] = std::make_pair(-1, 0.0f);
             }
+        } else {
+            local_neighbors[i] = std::make_pair(-1, 0.0f);
+        }
+    }
+    for (const auto& p : local_neighbors) {
+        if (p.first != -1) {
+            potential_neighbors.push_back(p);
         }
     }
 
@@ -247,12 +264,19 @@ RecommendationList generateRecommendationsLSH(
     const UserNormsMap& user_norms,
     const std::vector<HyperplaneSet>& all_hyperplane_sets,
     const std::vector<LSHBucketMap>& lsh_tables,
-    const MovieIdToDenseIdxMap& movie_to_idx) {
-    
-    NeighborList k_approx_neighbors = findApproximateKNearestNeighborsLSH(
-        target_user_id, all_user_ratings, user_norms, 
-        all_hyperplane_sets, lsh_tables, movie_to_idx, K_neighbors_for_recs);
-
+    const MovieIdToDenseIdxMap& movie_to_idx,
+    const NeighborList* precomputed_neighbors,
+    float similarity_threshold,
+    bool use_user_mean_filter
+) {
+    NeighborList k_approx_neighbors;
+    if (precomputed_neighbors) {
+        k_approx_neighbors = *precomputed_neighbors;
+    } else {
+        k_approx_neighbors = findApproximateKNearestNeighborsLSH(
+            target_user_id, all_user_ratings, user_norms, 
+            all_hyperplane_sets, lsh_tables, movie_to_idx, K_neighbors_for_recs);
+    }
     if (k_approx_neighbors.empty()) {
         return {};
     }
@@ -263,41 +287,79 @@ RecommendationList generateRecommendationsLSH(
     }
     const auto& target_user_seen_movies = it_target_ratings_map->second;
 
-    std::unordered_map<int, float> movie_weighted_score_sum;
-    std::unordered_map<int, float> movie_similarity_sum;
+    // Calcular média do usuário alvo
+    float user_mean = 0.0f;
+    if (!target_user_seen_movies.empty()) {
+        float sum = 0.0f;
+        for (const auto& p : target_user_seen_movies) sum += p.second;
+        user_mean = sum / target_user_seen_movies.size();
+    }
 
-    for (const auto& neighbor_pair : k_approx_neighbors) {
-        int neighbor_id = neighbor_pair.first;
-        float similarity_score = neighbor_pair.second;
+    int n_threads = 1;
+    #ifdef _OPENMP
+    n_threads = omp_get_max_threads();
+    #endif
+    std::vector<std::unordered_map<int, float>> movie_weighted_score_sum_local(n_threads);
+    std::vector<std::unordered_map<int, float>> movie_similarity_sum_local(n_threads);
 
+    #pragma omp parallel for schedule(dynamic)
+    for (size_t idx = 0; idx < k_approx_neighbors.size(); ++idx) {
+        int thread_id = 0;
+        #ifdef _OPENMP
+        thread_id = omp_get_thread_num();
+        #endif
+        int neighbor_id = k_approx_neighbors[idx].first;
+        float similarity_score = k_approx_neighbors[idx].second;
+        if (similarity_score < similarity_threshold) continue; // Ignorar vizinhos pouco similares
         const auto& neighbor_ratings = all_user_ratings.at(neighbor_id);
-
         for (const auto& movie_rating_entry : neighbor_ratings) {
             int movie_id = movie_rating_entry.first;
             float rating = movie_rating_entry.second;
-
             if (target_user_seen_movies.count(movie_id)) {
                 continue;
             }
-            movie_weighted_score_sum[movie_id] += rating * similarity_score;
-            movie_similarity_sum[movie_id] += similarity_score;
+            movie_weighted_score_sum_local[thread_id][movie_id] += rating * similarity_score;
+            movie_similarity_sum_local[thread_id][movie_id] += similarity_score;
         }
     }
-
+    // Redução dos mapas locais para globais
+    std::unordered_map<int, float> movie_weighted_score_sum;
+    std::unordered_map<int, float> movie_similarity_sum;
+    for (int t = 0; t < n_threads; ++t) {
+        for (const auto& p : movie_weighted_score_sum_local[t]) {
+            movie_weighted_score_sum[p.first] += p.second;
+        }
+        for (const auto& p : movie_similarity_sum_local[t]) {
+            movie_similarity_sum[p.first] += p.second;
+        }
+    }
     RecommendationList recommendations;
-    for (const auto& score_entry : movie_weighted_score_sum) {
-        int movie_id = score_entry.first;
-        float total_weighted_score = score_entry.second;
-        float total_similarity = movie_similarity_sum.at(movie_id);
-
-        if (total_similarity > 0.0f) {
-            float predicted_rating = total_weighted_score / total_similarity;
-            recommendations.emplace_back(movie_id, predicted_rating);
+    if (true) { // bloco principal
+        for (const auto& score_entry : movie_weighted_score_sum) {
+            int movie_id = score_entry.first;
+            float total_weighted_score = score_entry.second;
+            float total_similarity = movie_similarity_sum.at(movie_id);
+            if (total_similarity > 1.0f) {
+                float predicted_rating = total_weighted_score / total_similarity;
+                if (!use_user_mean_filter || predicted_rating > user_mean) {
+                    recommendations.emplace_back(movie_id, predicted_rating);
+                }
+            }
+        }
+        if (recommendations.empty()) {
+            // Fallback: recomenda todos com total_similarity > 0
+            for (const auto& score_entry : movie_weighted_score_sum) {
+                int movie_id = score_entry.first;
+                float total_weighted_score = score_entry.second;
+                float total_similarity = movie_similarity_sum.at(movie_id);
+                if (total_similarity > 0.0f) {
+                    float predicted_rating = total_weighted_score / total_similarity;
+                    recommendations.emplace_back(movie_id, predicted_rating);
+                }
+            }
         }
     }
-
     std::sort(recommendations.begin(), recommendations.end(),
               [](const auto& a, const auto& b) { return a.second > b.second; });
-
     return recommendations;
 }

@@ -1,45 +1,49 @@
 #include "csv_parser.hpp"
-#include "config.hpp" // Para CSV_READ_BUFFER_SIZE
+#include "config.hpp"
 #include <fstream>
-#include <sstream>
 #include <iostream>
 #include <vector>
-#include <algorithm> // Para std::remove_if, std::shuffle
-#include <random>    // Para std::random_device, std::mt19937
+#include <algorithm>
+#include <random>
+#include <string_view>
+#include <charconv>
+#include <unordered_set>
+#include <unordered_map>
 
 MovieTitlesMap readMovieTitles(const std::string& movies_csv_path) {
     MovieTitlesMap movie_titles;
     std::ifstream file(movies_csv_path);
-
     if (!file.is_open()) {
         std::cerr << "Error: Could not open movies file: " << movies_csv_path << std::endl;
         return movie_titles;
     }
 
     std::string line;
-    std::getline(file, line); 
+    std::getline(file, line); // Skip header
 
     while (std::getline(file, line)) {
-        std::stringstream ss(line);
-        std::string id_str;
-        std::string title;
-        
-        if (!std::getline(ss, id_str, ',')) continue;
-        std::getline(ss, title); 
+        std::string_view sv_line(line);
+        auto comma_pos = sv_line.find(',');
+        if (comma_pos == std::string_view::npos) continue;
 
+        std::string_view id_str = sv_line.substr(0, comma_pos);
+        std::string_view title = sv_line.substr(comma_pos + 1);
+
+        // Remove aspas
         if (!title.empty() && title.front() == '"' && title.back() == '"') {
-            title = title.substr(1, title.length() - 2);
+            title.remove_prefix(1);
+            title.remove_suffix(1);
         }
-        
-        try {
-            int movie_id = std::stoi(id_str);
-            movie_titles[movie_id] = title;
-        } catch (const std::invalid_argument& ia) {
+
+        int movie_id;
+        auto [ptr, ec] = std::from_chars(id_str.data(), id_str.data() + id_str.size(), movie_id);
+        if (ec == std::errc()) {
+            movie_titles[movie_id] = std::string(title); // precisa copiar para std::string
+        } else {
             std::cerr << "Warning: Invalid movie ID format in movies.csv: " << id_str << " in line: " << line << std::endl;
-        } catch (const std::out_of_range& oor) {
-            std::cerr << "Warning: Movie ID out of range in movies.csv: " << id_str << " in line: " << line << std::endl;
         }
     }
+
     return movie_titles;
 }
 
@@ -55,32 +59,35 @@ void readRatingsCSV(const std::string& ratings_csv_path, UserRatingsLog& users_r
 
     users_ratings_log.clear();
     std::string line;
-    std::getline(inFile, line); 
+    std::getline(inFile, line); // Skip header
 
     while (std::getline(inFile, line)) {
-        if (line.empty() || line.back() == '\r') { 
-             if (!line.empty()) line.pop_back();
-             if (line.empty()) continue;
-        }
+        if (line.empty()) continue;
+        if (line.back() == '\r') line.pop_back();
 
-        std::stringstream ss(line);
-        std::string token_user_id, token_movie_id, token_rating;
+        std::string_view sv_line(line);
+
+        auto first_comma = sv_line.find(',');
+        if (first_comma == std::string_view::npos) continue;
+
+        auto second_comma = sv_line.find(',', first_comma + 1);
+        if (second_comma == std::string_view::npos) continue;
+
+        std::string_view user_str = sv_line.substr(0, first_comma);
+        std::string_view movie_str = sv_line.substr(first_comma + 1, second_comma - first_comma - 1);
+        std::string_view rating_str = sv_line.substr(second_comma + 1);
+
         int user_id, movie_id;
         float rating_value;
 
-        if (!std::getline(ss, token_user_id, ',')) continue;
-        if (!std::getline(ss, token_movie_id, ',')) continue;
-        if (!std::getline(ss, token_rating, ',')) continue;
+        auto [p1, ec1] = std::from_chars(user_str.data(), user_str.data() + user_str.size(), user_id);
+        auto [p2, ec2] = std::from_chars(movie_str.data(), movie_str.data() + movie_str.size(), movie_id);
+        auto [p3, ec3] = std::from_chars(rating_str.data(), rating_str.data() + rating_str.size(), rating_value);
 
-        try {
-            user_id = std::stoi(token_user_id);
-            movie_id = std::stoi(token_movie_id);
-            rating_value = std::stof(token_rating);
+        if (ec1 == std::errc() && ec2 == std::errc() && ec3 == std::errc()) {
             users_ratings_log[user_id].emplace_back(movie_id, rating_value);
-        } catch (const std::invalid_argument& ia) {
-            std::cerr << "Warning: Invalid data format in ratings.csv line: " << line << " (" << ia.what() << ")" << std::endl;
-        } catch (const std::out_of_range& oor) {
-            std::cerr << "Warning: Data out of range in ratings.csv line: " << line << " (" << oor.what() << ")" << std::endl;
+        } else {
+            std::cerr << "Warning: Invalid data format in ratings.csv line: " << line << std::endl;
         }
     }
 }
@@ -88,15 +95,18 @@ void readRatingsCSV(const std::string& ratings_csv_path, UserRatingsLog& users_r
 void countEntityRatings(const UserRatingsLog& users_ratings_log,
                         std::unordered_map<int, int>& user_rating_counts,
                         std::unordered_map<int, int>& movie_rating_counts) {
-    user_rating_counts.clear();
-    movie_rating_counts.clear();
+    std::unordered_map<int, int> new_user_counts;
+    std::unordered_map<int, int> new_movie_counts;
 
     for (const auto& user_entry : users_ratings_log) {
-        user_rating_counts[user_entry.first] = user_entry.second.size();
+        new_user_counts[user_entry.first] = user_entry.second.size();
         for (const auto& movie_rating_pair : user_entry.second) {
-            movie_rating_counts[movie_rating_pair.first]++;
+            new_movie_counts[movie_rating_pair.first]++;
         }
     }
+
+    user_rating_counts = std::move(new_user_counts);
+    movie_rating_counts = std::move(new_movie_counts);
 }
 
 void identifyValidEntities(const std::unordered_map<int, int>& user_rating_counts,
@@ -104,33 +114,36 @@ void identifyValidEntities(const std::unordered_map<int, int>& user_rating_count
                            std::unordered_set<int>& valid_user_ids,
                            std::unordered_set<int>& valid_movie_ids,
                            int min_ratings) {
-    valid_user_ids.clear();
-    valid_movie_ids.clear();
+    std::unordered_set<int> new_valid_users;
+    std::unordered_set<int> new_valid_movies;
 
     for (const auto& pair : user_rating_counts) {
         if (pair.second >= min_ratings) {
-            valid_user_ids.insert(pair.first);
+            new_valid_users.insert(pair.first);
         }
     }
     for (const auto& pair : movie_rating_counts) {
         if (pair.second >= min_ratings) {
-            valid_movie_ids.insert(pair.first);
+            new_valid_movies.insert(pair.first);
         }
     }
+
+    valid_user_ids = std::move(new_valid_users);
+    valid_movie_ids = std::move(new_valid_movies);
 }
 
 void filterUserRatingsLog(UserRatingsLog& users_ratings_log,
                           const std::unordered_set<int>& valid_user_ids,
                           const std::unordered_set<int>& valid_movie_ids) {
     for (auto it_user = users_ratings_log.begin(); it_user != users_ratings_log.end();) {
-        if (valid_user_ids.find(it_user->first) == valid_user_ids.end()) {
+        if (!valid_user_ids.count(it_user->first)) {
             it_user = users_ratings_log.erase(it_user);
         } else {
             auto& movie_ratings_vector = it_user->second;
             movie_ratings_vector.erase(
                 std::remove_if(movie_ratings_vector.begin(), movie_ratings_vector.end(),
                                [&valid_movie_ids](const std::pair<int, float>& p) {
-                                   return valid_movie_ids.find(p.first) == valid_movie_ids.end();
+                                   return !valid_movie_ids.count(p.first);
                                }),
                 movie_ratings_vector.end());
 
@@ -144,21 +157,33 @@ void filterUserRatingsLog(UserRatingsLog& users_ratings_log,
 }
 
 void writeFilteredRatingsToFile(const std::string& output_path, const UserRatingsLog& users_ratings_log) {
-    std::ofstream outFile(output_path);
+    std::ofstream outFile(output_path, std::ios::out | std::ios::binary);
     if (!outFile.is_open()) {
         std::cerr << "Error: Could not open output file for filtered data: " << output_path << std::endl;
         return;
     }
 
-    for (const auto& user_entry : users_ratings_log) {
-        if (user_entry.second.empty()) continue; 
+    std::string output_buffer;
+    output_buffer.reserve(300 * 1024 * 1024); // ajuste conforme necessário
 
-        outFile << user_entry.first; 
-        for (const auto& movie_rating_pair : user_entry.second) {
-            outFile << " " << movie_rating_pair.first << ":" << movie_rating_pair.second;
+    char rating_str[16]; // buffer temporário para rating formatado
+    for (const auto& [user_id, ratings] : users_ratings_log) {
+        if (ratings.empty()) continue;
+
+        output_buffer.append(std::to_string(user_id));
+        for (const auto& [movie_id, rating] : ratings) {
+            output_buffer.push_back(' ');
+            output_buffer.append(std::to_string(movie_id));
+            output_buffer.push_back(':');
+
+            // converte float com precisão fixa (1 casas decimais)
+            std::snprintf(rating_str, sizeof(rating_str), "%.1f", rating);
+            output_buffer.append(rating_str);
         }
-        outFile << "\n";
+        output_buffer.push_back('\n');
     }
+
+    outFile.write(output_buffer.data(), output_buffer.size());
 }
 
 void writeRandomUserIdsToExplore(const UserRatingsLog& users_ratings_log,
@@ -172,18 +197,18 @@ void writeRandomUserIdsToExplore(const UserRatingsLog& users_ratings_log,
 
     if (all_user_ids.empty()) {
         std::cerr << "Warning: No users available to select for exploration file." << std::endl;
-        std::ofstream outFile(output_path); 
+        std::ofstream outFile(output_path);
         return;
     }
-    
+
     if (num_users_to_select > all_user_ids.size()) {
-        num_users_to_select = all_user_ids.size(); 
+        num_users_to_select = all_user_ids.size();
         std::cout << "Warning: Requested " << num_users_to_select << " users for explore file, but only "
                   << all_user_ids.size() << " are available. Selecting all." << std::endl;
     }
-
-    std::random_device rd;
-    std::mt19937 generator(rd());
+    //std::random_device rd;
+    //std::mt19937 generator(rd());
+    std::mt19937 generator(42); // 42 é a semente fixa, pode escolher outro número
     std::shuffle(all_user_ids.begin(), all_user_ids.end(), generator);
 
     std::ofstream outFile(output_path);
