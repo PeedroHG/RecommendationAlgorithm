@@ -83,4 +83,74 @@ RecommendationList generateRecommendationsLSH(
     bool use_user_mean_filter = true    // Novo parâmetro: filtrar recomendações abaixo da média do usuário
 );
 
+// --- Fase 3: Recommendation Generation Functions ---
+
+/**
+ * @brief Carrega IDs de usuários do arquivo de exploração.
+ * @param file_path Caminho para o arquivo com IDs de usuários.
+ * @return std::vector<int> Lista de IDs de usuários para processar.
+ */
+std::vector<int> loadExploreUserIds(const std::string& file_path);
+
+/**
+ * @brief Prepara o arquivo de saída de recomendações.
+ * @param output_path Caminho para o arquivo de saída.
+ * @param top_n Número de recomendações por usuário.
+ * @param k_neighbors Número de vizinhos usados.
+ * @param num_tables Número de tabelas LSH.
+ * @param num_hyperplanes Número de hiperplanos por tabela.
+ * @return std::ofstream Stream do arquivo de saída.
+ */
+std::ofstream prepareRecommendationsOutput(const std::string& output_path, 
+                                         int top_n, int k_neighbors, 
+                                         int num_tables, int num_hyperplanes);
+
+/**
+ * @brief Processa recomendações para um usuário específico.
+ * @param target_user_id ID do usuário alvo.
+ * @param user_item_matrix Matriz de avaliações usuário-item.
+ * @param user_norms Normas dos usuários.
+ * @param all_hyperplane_sets Conjuntos de hiperplanos LSH.
+ * @param lsh_tables Tabelas hash LSH.
+ * @param movie_to_idx Mapeamento de IDs de filmes.
+ * @param movie_titles Mapeamento de IDs para títulos de filmes.
+ * @param k_neighbors Número de vizinhos para usar.
+ * @param top_n Número de recomendações a retornar.
+ * @return std::string Saída formatada das recomendações.
+ */
+std::string processUserRecommendations(
+    int target_user_id,
+    const UserItemMatrix& user_item_matrix,
+    const UserNormsMap& user_norms,
+    const std::vector<HyperplaneSet>& all_hyperplane_sets,
+    const std::vector<LSHBucketMap>& lsh_tables,
+    const MovieIdToDenseIdxMap& movie_to_idx,
+    const MovieTitlesMap& movie_titles,
+    int k_neighbors,
+    int top_n);
+
+/**
+ * @brief Gera recomendações para múltiplos usuários em paralelo.
+ * @param explore_user_ids Lista de IDs de usuários para processar.
+ * @param user_item_matrix Matriz de avaliações usuário-item.
+ * @param user_norms Normas dos usuários.
+ * @param all_hyperplane_sets Conjuntos de hiperplanos LSH.
+ * @param lsh_tables Tabelas hash LSH.
+ * @param movie_to_idx Mapeamento de IDs de filmes.
+ * @param movie_titles Mapeamento de IDs para títulos de filmes.
+ * @param k_neighbors Número de vizinhos para usar.
+ * @param top_n Número de recomendações por usuário.
+ * @return std::vector<std::string> Lista de saídas formatadas.
+ */
+std::vector<std::string> generateRecommendationsForUsers(
+    const std::vector<int>& explore_user_ids,
+    const UserItemMatrix& user_item_matrix,
+    const UserNormsMap& user_norms,
+    const std::vector<HyperplaneSet>& all_hyperplane_sets,
+    const std::vector<LSHBucketMap>& lsh_tables,
+    const MovieIdToDenseIdxMap& movie_to_idx,
+    const MovieTitlesMap& movie_titles,
+    int k_neighbors,
+    int top_n);
+
 #endif // RECOMMENDER_ENGINE_HPP

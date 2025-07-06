@@ -62,7 +62,7 @@ int main() {
     writeFilteredRatingsToFile(FILTERED_DATASET_PATH, filtered_users_ratings);
 
     std::cout << "Writing random users to explore to: " << EXPLORE_USERS_PATH << std::endl;
-    //writeRandomUserIdsToExplore(filtered_users_ratings, NUM_RANDOM_USERS_TO_EXPLORE, EXPLORE_USERS_PATH);
+    writeRandomUserIdsToExplore(filtered_users_ratings, NUM_RANDOM_USERS_TO_EXPLORE, EXPLORE_USERS_PATH);
 
     auto phase_end_time = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> phase_elapsed = phase_end_time - phase_start_time;
@@ -127,7 +127,7 @@ int main() {
         std::cout << "Building " << NUM_LSH_TABLES << " LSH tables..." << std::endl;
         buildLSHTables(user_item_matrix, all_hyperplane_sets, movie_to_idx, lsh_tables);
     }
-
+    
 
     phase_end_time = std::chrono::high_resolution_clock::now();
     phase_elapsed = phase_end_time - phase_start_time;
@@ -141,99 +141,38 @@ int main() {
     // Carregar ground truth para avaliação (usando o dataset filtrado como exemplo)
     Evaluator evaluator(filtered_users_ratings);
 
-    std::ifstream exploreFile(EXPLORE_USERS_PATH);
-    if (!exploreFile.is_open()) {
-        std::cerr << "Error: Could not open explore users file: " << EXPLORE_USERS_PATH << std::endl;
-    }
-
-    std::ofstream recommendationsOutputFile(OUTPUT_RECOMMENDATIONS_PATH);
-    if (!recommendationsOutputFile.is_open()) {
-        std::cerr << "Error: Could not create output recommendations file: " << OUTPUT_RECOMMENDATIONS_PATH << std::endl;
+    // Carregar IDs de usuários para processar
+    std::vector<int> explore_user_ids = loadExploreUserIds(EXPLORE_USERS_PATH);
+    if (explore_user_ids.empty()) {
+        std::cerr << "Error: No users to process. Check explore file." << std::endl;
         return 1;
     }
+
+    // Preparar arquivo de saída
+    std::ofstream recommendationsOutputFile = prepareRecommendationsOutput(
+        OUTPUT_RECOMMENDATIONS_PATH, TOP_N_RECOMMENDATIONS, K_NEIGHBORS, 
+        NUM_LSH_TABLES, NUM_HYPERPLANES_PER_TABLE);
     
-    recommendationsOutputFile << "LSH Movie Recommendations (Top " << TOP_N_RECOMMENDATIONS 
-                              << " using K_approx=" << K_NEIGHBORS 
-                              << ", L=" << NUM_LSH_TABLES << ", k_hash=" << NUM_HYPERPLANES_PER_TABLE << ")\n";
-    recommendationsOutputFile << "-----------------------------------------------------------\n\n";
-    
-    int target_user_id_to_recommend;
-    int users_processed_for_recommendation = 0;
-    if (exploreFile.is_open()) {
-        std::cout << "Generating LSH recommendations for users in " << EXPLORE_USERS_PATH << "..." << std::endl;
-
-        // Lê todos os usuários a serem processados
-        std::vector<int> explore_user_ids;
-        int uid;
-        while (exploreFile >> uid) explore_user_ids.push_back(uid);
-        exploreFile.close();
-
-        // Buffer para saída paralela
-        std::vector<std::string> user_outputs(explore_user_ids.size());
-
-        #pragma omp parallel for schedule(dynamic)
-        for (size_t idx = 0; idx < explore_user_ids.size(); ++idx) {
-            int target_user_id_to_recommend = explore_user_ids[idx];
-            // Obter os k vizinhos mais próximos via LSH
-            NeighborList neighbors = findApproximateKNearestNeighborsLSH(
-                target_user_id_to_recommend, user_item_matrix, user_norms,
-                all_hyperplane_sets, lsh_tables, movie_to_idx, K_NEIGHBORS);
-            // Calcule a similaridade média dos vizinhos
-            float mean_similarity = 0.0f;
-            if (!neighbors.empty()) {
-                float sum = 0.0f;
-                for (const auto& p : neighbors) sum += p.second;
-                mean_similarity = sum / neighbors.size();
-            }
-            std::vector<int> neighbor_ids;
-            for (const auto& n : neighbors) neighbor_ids.push_back(n.first);
-            RecommendationList recommendations = generateRecommendationsLSH(
-                target_user_id_to_recommend, K_NEIGHBORS, user_item_matrix, user_norms,
-                all_hyperplane_sets, lsh_tables, movie_to_idx, &neighbors, 0.1f, true);
-            // Converter para vetor de IDs de filmes
-            std::vector<int> recommended_ids;
-            int count = 0;
-            for (const auto& rec : recommendations) {
-                if (count++ >= TOP_N_RECOMMENDATIONS) break;
-                recommended_ids.push_back(rec.first);
-            }
-            // Montar saída formatada (com similaridade média)
-            std::ostringstream oss;
-            oss << "User ID: " << target_user_id_to_recommend << " | Similaridade Media: " << std::fixed << std::setprecision(2) << mean_similarity << "\n";
-            oss << "  Recommended Movies (MovieID: Score | Title):\n";
-            count = 0;
-            for (const auto& movie_id : recommended_ids) {
-                if (count++ >= TOP_N_RECOMMENDATIONS) break;
-                // Buscar o score correspondente ao movie_id
-                double score = 0.0;
-                for (const auto& rec : recommendations) {
-                    if (rec.first == movie_id) {
-                        score = rec.second;
-                        break;
-                    }
-                }
-                // Score em percentual (0-100%)
-                double score_percent = (score / 5.0) * 100.0;
-                oss << "  - " << movie_id << ": " << std::fixed << std::setprecision(1) << score_percent << "% | ";
-                if (movie_titles.count(movie_id)) {
-                    oss << movie_titles.at(movie_id);
-                } else {
-                    oss << "(Title not found)";
-                }
-                oss << "\n";
-            }
-            oss << "\n";
-            user_outputs[idx] = oss.str();
-        }
-        // Escrever tudo de uma vez (thread-safe)
-        for (const auto& out : user_outputs) {
-            recommendationsOutputFile << out;
-        }
-
-        std::cout << "LSH Recommendations written to: " << OUTPUT_RECOMMENDATIONS_PATH << std::endl;
-    } else {
-        std::cerr << "Error: Could not open explore users file: " << EXPLORE_USERS_PATH << std::endl;
+    if (!recommendationsOutputFile.is_open()) {
+        std::cerr << "Error: Could not create output file." << std::endl;
+        return 1;
     }
+
+    // Gerar recomendações para todos os usuários
+    std::cout << "Generating LSH recommendations for " << explore_user_ids.size() 
+              << " users in " << EXPLORE_USERS_PATH << "..." << std::endl;
+    
+    std::vector<std::string> user_outputs = generateRecommendationsForUsers(
+        explore_user_ids, user_item_matrix, user_norms,
+        all_hyperplane_sets, lsh_tables, movie_to_idx, movie_titles,
+        K_NEIGHBORS, TOP_N_RECOMMENDATIONS);
+
+    // Escrever resultados no arquivo
+    for (const auto& out : user_outputs) {
+        recommendationsOutputFile << out;
+    }
+
+    std::cout << "LSH Recommendations written to: " << OUTPUT_RECOMMENDATIONS_PATH << std::endl;
 
     phase_end_time = std::chrono::high_resolution_clock::now();
     phase_elapsed = phase_end_time - phase_start_time;

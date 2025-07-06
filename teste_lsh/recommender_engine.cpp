@@ -5,6 +5,9 @@
 #include <vector>
 #include <iostream>
 #include <set> // Para coletar candidatos únicos
+#include <fstream>
+#include <sstream>
+#include <iomanip>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -362,4 +365,125 @@ RecommendationList generateRecommendationsLSH(
     std::sort(recommendations.begin(), recommendations.end(),
               [](const auto& a, const auto& b) { return a.second > b.second; });
     return recommendations;
+}
+
+// --- Fase 3: Recommendation Generation Functions ---
+
+std::vector<int> loadExploreUserIds(const std::string& file_path) {
+    std::vector<int> user_ids;
+    std::ifstream file(file_path);
+    
+    if (!file.is_open()) {
+        std::cerr << "Error: Could not open explore users file: " << file_path << std::endl;
+        return user_ids;
+    }
+    
+    int uid;
+    while (file >> uid) {
+        user_ids.push_back(uid);
+    }
+    
+    file.close();
+    return user_ids;
+}
+
+std::ofstream prepareRecommendationsOutput(const std::string& output_path, 
+                                         int top_n, int k_neighbors, 
+                                         int num_tables, int num_hyperplanes) {
+    std::ofstream output_file(output_path);
+    
+    if (!output_file.is_open()) {
+        std::cerr << "Error: Could not create output recommendations file: " << output_path << std::endl;
+        return output_file;
+    }
+    
+    output_file << "LSH Movie Recommendations (Top " << top_n 
+                << " using K_approx=" << k_neighbors 
+                << ", L=" << num_tables << ", k_hash=" << num_hyperplanes << ")\n";
+    output_file << "-----------------------------------------------------------\n\n";
+    
+    return output_file;
+}
+
+std::string processUserRecommendations(
+    int target_user_id,
+    const UserItemMatrix& user_item_matrix,
+    const UserNormsMap& user_norms,
+    const std::vector<HyperplaneSet>& all_hyperplane_sets,
+    const std::vector<LSHBucketMap>& lsh_tables,
+    const MovieIdToDenseIdxMap& movie_to_idx,
+    const MovieTitlesMap& movie_titles,
+    int k_neighbors,
+    int top_n) {
+    
+    // Obter os k vizinhos mais próximos via LSH
+    NeighborList neighbors = findApproximateKNearestNeighborsLSH(
+        target_user_id, user_item_matrix, user_norms,
+        all_hyperplane_sets, lsh_tables, movie_to_idx, k_neighbors);
+    
+    // Calcular a similaridade média dos vizinhos
+    float mean_similarity = 0.0f;
+    if (!neighbors.empty()) {
+        float sum = 0.0f;
+        for (const auto& p : neighbors) sum += p.second;
+        mean_similarity = sum / neighbors.size();
+    }
+    
+    // Gerar recomendações
+    RecommendationList recommendations = generateRecommendationsLSH(
+        target_user_id, k_neighbors, user_item_matrix, user_norms,
+        all_hyperplane_sets, lsh_tables, movie_to_idx, &neighbors, 0.1f, true);
+    
+    // Formatar saída
+    std::ostringstream oss;
+    oss << "User ID: " << target_user_id << " | Similaridade Media: " 
+        << std::fixed << std::setprecision(2) << mean_similarity << "\n";
+    oss << "  Recommended Movies (MovieID: Score | Title):\n";
+    
+    int count = 0;
+    for (const auto& rec : recommendations) {
+        if (count++ >= top_n) break;
+        
+        int movie_id = rec.first;
+        double score = rec.second;
+        double score_percent = (score / 5.0) * 100.0;
+        
+        oss << "  - " << movie_id << ": " << std::fixed << std::setprecision(1) 
+            << score_percent << "% | ";
+        
+        if (movie_titles.count(movie_id)) {
+            oss << movie_titles.at(movie_id);
+        } else {
+            oss << "(Title not found)";
+        }
+        oss << "\n";
+    }
+    oss << "\n";
+    
+    return oss.str();
+}
+
+std::vector<std::string> generateRecommendationsForUsers(
+    const std::vector<int>& explore_user_ids,
+    const UserItemMatrix& user_item_matrix,
+    const UserNormsMap& user_norms,
+    const std::vector<HyperplaneSet>& all_hyperplane_sets,
+    const std::vector<LSHBucketMap>& lsh_tables,
+    const MovieIdToDenseIdxMap& movie_to_idx,
+    const MovieTitlesMap& movie_titles,
+    int k_neighbors,
+    int top_n) {
+    
+    std::vector<std::string> user_outputs(explore_user_ids.size());
+    
+    #pragma omp parallel for schedule(dynamic)
+    for (size_t idx = 0; idx < explore_user_ids.size(); ++idx) {
+        int target_user_id = explore_user_ids[idx];
+        user_outputs[idx] = processUserRecommendations(
+            target_user_id, user_item_matrix, user_norms,
+            all_hyperplane_sets, lsh_tables, movie_to_idx, movie_titles,
+            k_neighbors, top_n);
+    }
+    
+    return user_outputs;
 }
