@@ -77,6 +77,7 @@ RecommendationList generateRecommendationsLSH(
     const UserNormsMap& user_norms,
     const std::vector<HyperplaneSet>& all_hyperplane_sets,
     const std::vector<LSHBucketMap>& lsh_tables,
-    const MovieIdToDenseIdxMap& movie_to_idx);
+    const MovieIdToDenseIdxMap& movie_to_idx,
+    const NeighborList* precomputed_neighbors = nullptr);
 
 #endif // RECOMMENDER_ENGINE_HPP

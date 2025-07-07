@@ -8,7 +8,6 @@
 
 #ifdef _OPENMP
 #include <omp.h>
-int num_threads = omp_get_max_threads();
 #endif
 
 // convertToUserItemMatrix e computeUserNorms permanecem como na versão OpenMP anterior
@@ -160,14 +159,8 @@ void buildLSHTables(const UserItemMatrix& user_item_matrix,
         const auto& current_hyperplane_set = all_hyperplane_sets[table_idx];
         LSHBucketMap& current_bucket_map = lsh_tables[table_idx];
 
-        // Descobre o número de threads a ser usado
-        int num_threads = 1;
-        #ifdef _OPENMP
-        num_threads = omp_get_max_threads();
-        #endif
-
         // Estrutura temporária para armazenar (hash, user_id) para evitar locks no loop principal
-        std::vector<std::vector<std::pair<LSHHashValue, int>>> thread_local_hashes(num_threads);
+        std::vector<std::vector<std::pair<LSHHashValue, int>>> thread_local_hashes(omp_get_max_threads());
 
         #pragma omp parallel for schedule(dynamic)
         for (size_t i = 0; i < user_matrix_vec.size(); ++i) {
@@ -227,14 +220,28 @@ NeighborList findApproximateKNearestNeighborsLSH(
     }
 
     NeighborList potential_neighbors;
-    for (int candidate_id : candidate_user_ids) {
+    std::vector<int> candidate_vec(candidate_user_ids.begin(), candidate_user_ids.end());
+    std::vector<std::pair<int, float>> local_neighbors(candidate_vec.size());
+
+#pragma omp parallel for schedule(dynamic)
+    for (size_t i = 0; i < candidate_vec.size(); ++i) {
+        int candidate_id = candidate_vec[i];
         auto it_candidate_ratings = user_item_matrix.find(candidate_id);
         if (it_candidate_ratings != user_item_matrix.end()) {
             float candidate_norm = user_norms.at(candidate_id);
             float similarity = calculateCosineSimilarity(target_ratings, it_candidate_ratings->second, target_norm, candidate_norm);
-            if (similarity > 0.0f) { // Considera apenas similaridade positiva
-                potential_neighbors.emplace_back(candidate_id, similarity);
+            if (similarity > 0.0f) {
+                local_neighbors[i] = std::make_pair(candidate_id, similarity);
+            } else {
+                local_neighbors[i] = std::make_pair(-1, 0.0f);
             }
+        } else {
+            local_neighbors[i] = std::make_pair(-1, 0.0f);
+        }
+    }
+    for (const auto& p : local_neighbors) {
+        if (p.first != -1) {
+            potential_neighbors.push_back(p);
         }
     }
 
@@ -254,12 +261,16 @@ RecommendationList generateRecommendationsLSH(
     const UserNormsMap& user_norms,
     const std::vector<HyperplaneSet>& all_hyperplane_sets,
     const std::vector<LSHBucketMap>& lsh_tables,
-    const MovieIdToDenseIdxMap& movie_to_idx) {
-    
-    NeighborList k_approx_neighbors = findApproximateKNearestNeighborsLSH(
-        target_user_id, all_user_ratings, user_norms, 
-        all_hyperplane_sets, lsh_tables, movie_to_idx, K_neighbors_for_recs);
-
+    const MovieIdToDenseIdxMap& movie_to_idx,
+    const NeighborList* precomputed_neighbors) {
+    NeighborList k_approx_neighbors;
+    if (precomputed_neighbors) {
+        k_approx_neighbors = *precomputed_neighbors;
+    } else {
+        k_approx_neighbors = findApproximateKNearestNeighborsLSH(
+            target_user_id, all_user_ratings, user_norms, 
+            all_hyperplane_sets, lsh_tables, movie_to_idx, K_neighbors_for_recs);
+    }
     if (k_approx_neighbors.empty()) {
         return {};
     }
@@ -270,41 +281,54 @@ RecommendationList generateRecommendationsLSH(
     }
     const auto& target_user_seen_movies = it_target_ratings_map->second;
 
-    std::unordered_map<int, float> movie_weighted_score_sum;
-    std::unordered_map<int, float> movie_similarity_sum;
+    int n_threads = 1;
+    #ifdef _OPENMP
+    n_threads = omp_get_max_threads();
+    #endif
+    std::vector<std::unordered_map<int, float>> movie_weighted_score_sum_local(n_threads);
+    std::vector<std::unordered_map<int, float>> movie_similarity_sum_local(n_threads);
 
-    for (const auto& neighbor_pair : k_approx_neighbors) {
-        int neighbor_id = neighbor_pair.first;
-        float similarity_score = neighbor_pair.second;
-
+    #pragma omp parallel for schedule(dynamic)
+    for (size_t idx = 0; idx < k_approx_neighbors.size(); ++idx) {
+        int thread_id = 0;
+        #ifdef _OPENMP
+        thread_id = omp_get_thread_num();
+        #endif
+        int neighbor_id = k_approx_neighbors[idx].first;
+        float similarity_score = k_approx_neighbors[idx].second;
         const auto& neighbor_ratings = all_user_ratings.at(neighbor_id);
-
         for (const auto& movie_rating_entry : neighbor_ratings) {
             int movie_id = movie_rating_entry.first;
             float rating = movie_rating_entry.second;
-
             if (target_user_seen_movies.count(movie_id)) {
                 continue;
             }
-            movie_weighted_score_sum[movie_id] += rating * similarity_score;
-            movie_similarity_sum[movie_id] += similarity_score;
+            movie_weighted_score_sum_local[thread_id][movie_id] += rating * similarity_score;
+            movie_similarity_sum_local[thread_id][movie_id] += similarity_score;
         }
     }
-
+    // Redução dos mapas locais para globais
+    std::unordered_map<int, float> movie_weighted_score_sum;
+    std::unordered_map<int, float> movie_similarity_sum;
+    for (int t = 0; t < n_threads; ++t) {
+        for (const auto& p : movie_weighted_score_sum_local[t]) {
+            movie_weighted_score_sum[p.first] += p.second;
+        }
+        for (const auto& p : movie_similarity_sum_local[t]) {
+            movie_similarity_sum[p.first] += p.second;
+        }
+    }
     RecommendationList recommendations;
     for (const auto& score_entry : movie_weighted_score_sum) {
         int movie_id = score_entry.first;
         float total_weighted_score = score_entry.second;
         float total_similarity = movie_similarity_sum.at(movie_id);
-
         if (total_similarity > 0.0f) {
             float predicted_rating = total_weighted_score / total_similarity;
             recommendations.emplace_back(movie_id, predicted_rating);
         }
     }
-
     std::sort(recommendations.begin(), recommendations.end(),
               [](const auto& a, const auto& b) { return a.second > b.second; });
-
     return recommendations;
 }

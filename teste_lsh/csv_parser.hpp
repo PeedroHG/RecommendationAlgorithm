@@ -74,5 +74,12 @@ void writeFilteredRatingsToFile(const std::string& output_path, const UserRating
 void writeRandomUserIdsToExplore(const UserRatingsLog& users_ratings_log,
                                  size_t num_users_to_select,
                                  const std::string& output_path);
+/**
+ * @brief Executa todo o pipeline da Fase 1: Carregamento e Pré-processamento dos dados.
+ * @param filtered_ratings_out Parâmetro de saída para o log de avaliações filtrado.
+ * @param movie_titles_out Parâmetro de saída para o mapa de títulos de filmes.
+ * @return bool Retorna true se o processamento for bem-sucedido, false caso contrário.
+ */
+bool executePreProcessing(UserRatingsLog& filtered_ratings_out, MovieTitlesMap& movie_titles_out);
 
 #endif // CSV_PARSER_HPP
