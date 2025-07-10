@@ -18,11 +18,13 @@ const size_t NUM_RANDOM_USERS_TO_EXPLORE = 50;
 const int TOP_N_RECOMMENDATIONS = 5;
 
 // CSV Processing
-const size_t CSV_READ_BUFFER_SIZE = 128 * 1024 * 1024;
-
+// const size_t CSV_READ_BUFFER_SIZE = 128 * 1024 * 1024;
+const size_t CSV_READ_BUFFER_SIZE = 256 * 1024 * 1024;
+const size_t NUM_EXPECTED_UNIQUE_USERS = 163000;
+const size_t NUM_EXPECTED_UNIQUE_MOVIES = 62500;
 // cd Parameters
-const int NUM_LSH_TABLES = 5;
-const int NUM_HYPERPLANES_PER_TABLE = 16;
+const int NUM_LSH_TABLES = 7;
+const int NUM_HYPERPLANES_PER_TABLE = 5;
                                          // Hash value will be uint64_t, so k <= 64
 
 #endif // CONFIG_HPP

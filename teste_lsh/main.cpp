@@ -34,7 +34,6 @@ int main() {
     // --- 1. Data Loading and Preprocessing ---
     std::cout << "\n[Phase 1: Data Loading and Preprocessing]" << std::endl;
     auto phase_start_time = std::chrono::high_resolution_clock::now();
-
     UserRatingsLog raw_users_ratings; 
     std::cout << "Reading ratings from: " << RATINGS_CSV_PATH << std::endl;
     readRatingsCSV(RATINGS_CSV_PATH, raw_users_ratings);
@@ -62,7 +61,7 @@ int main() {
     writeFilteredRatingsToFile(FILTERED_DATASET_PATH, filtered_users_ratings);
 
     std::cout << "Writing random users to explore to: " << EXPLORE_USERS_PATH << std::endl;
-    writeRandomUserIdsToExplore(filtered_users_ratings, NUM_RANDOM_USERS_TO_EXPLORE, EXPLORE_USERS_PATH);
+    //writeRandomUserIdsToExplore(filtered_users_ratings, NUM_RANDOM_USERS_TO_EXPLORE, EXPLORE_USERS_PATH);
 
     auto phase_end_time = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> phase_elapsed = phase_end_time - phase_start_time;
@@ -139,7 +138,7 @@ int main() {
     phase_start_time = std::chrono::high_resolution_clock::now();
 
     // Carregar ground truth para avaliação (usando o dataset filtrado como exemplo)
-    Evaluator evaluator(filtered_users_ratings);
+    //Evaluator evaluator(filtered_users_ratings);
 
     // Carregar IDs de usuários para processar
     std::vector<int> explore_user_ids = loadExploreUserIds(EXPLORE_USERS_PATH);
