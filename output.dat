@@ -1,0 +1,410 @@
+LSH Movie Recommendations (Top 5 using K_approx=10, L=5, k_hash=5)
+-----------------------------------------------------------
+
+User ID: 1 | Similaridade Media: 0.23
+  Recommended Movies (MovieID: Score | Title):
+  - 750: 95.0% | Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1964),Comedy|War
+  - 3083: 94.1% | All About My Mother (Todo sobre mi madre) (1999),Drama
+  - 2019: 90.2% | Seven Samurai (Shichinin no samurai) (1954),Action|Adventure|Drama
+  - 50: 87.8% | Usual Suspects, The (1995)
+  - 3910: 86.4% | Dancer in the Dark (2000),Drama|Musical
+
+User ID: 2 | Similaridade Media: 0.47
+  Recommended Movies (MovieID: Score | Title):
+  - 34405: 90.0% | Serenity (2005),Action|Adventure|Sci-Fi
+  - 5377: 89.8% | About a Boy (2002),Comedy|Drama|Romance
+  - 1396: 88.0% | Sneakers (1992),Action|Comedy|Crime|Drama|Sci-Fi
+  - 1625: 88.0% | Game, The (1997)
+  - 5995: 87.7% | Pianist, The (2002)
+
+User ID: 3 | Similaridade Media: 0.57
+  Recommended Movies (MovieID: Score | Title):
+  - 85774: 100.0% | Senna (2010),Documentary
+  - 171011: 100.0% | Planet Earth II (2016),Documentary
+  - 98491: 94.9% | Paperman (2012),Animation|Comedy|Romance
+  - 159817: 93.3% | Planet Earth (2006),Documentary
+  - 47: 92.5% | Seven (a.k.a. Se7en) (1995),Mystery|Thriller
+
+User ID: 1 | Similaridade Media: 0.23
+  Recommended Movies (MovieID: Score | Title):
+  - 750: 95.0% | Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1964),Comedy|War
+  - 3083: 94.1% | All About My Mother (Todo sobre mi madre) (1999),Drama
+  - 2019: 90.2% | Seven Samurai (Shichinin no samurai) (1954),Action|Adventure|Drama
+  - 50: 87.8% | Usual Suspects, The (1995)
+  - 3910: 86.4% | Dancer in the Dark (2000),Drama|Musical
+
+User ID: 4 | Similaridade Media: 0.47
+  Recommended Movies (MovieID: Score | Title):
+  - 1704: 93.3% | Good Will Hunting (1997),Drama|Romance
+  - 122916: 91.5% | Thor: Ragnarok (2017),Action|Adventure|Sci-Fi
+  - 59315: 87.8% | Iron Man (2008),Action|Adventure|Sci-Fi
+  - 3578: 87.6% | Gladiator (2000),Action|Adventure|Drama
+  - 3527: 87.6% | Predator (1987),Action|Sci-Fi|Thriller
+
+User ID: 5 | Similaridade Media: 0.45
+  Recommended Movies (MovieID: Score | Title):
+  - 858: 100.0% | Godfather, The (1972)
+  - 2858: 100.0% | American Beauty (1999),Drama|Romance
+  - 318: 97.8% | Shawshank Redemption, The (1994)
+  - 1259: 93.5% | Stand by Me (1986),Adventure|Drama
+  - 280: 93.5% | Murder in the First (1995),Drama|Thriller
+
+User ID: 8 | Similaridade Media: 0.51
+  Recommended Movies (MovieID: Score | Title):
+  - 1136: 93.3% | Monty Python and the Holy Grail (1975),Adventure|Comedy|Fantasy
+  - 858: 92.1% | Godfather, The (1972)
+  - 1414: 90.3% | Mother (1996),Comedy
+  - 1221: 90.1% | Godfather: Part II, The (1974)
+  - 1193: 90.1% | One Flew Over the Cuckoo's Nest (1975),Drama
+
+User ID: 9 | Similaridade Media: 0.56
+  Recommended Movies (MovieID: Score | Title):
+  - 1269: 100.0% | Arsenic and Old Lace (1944),Comedy|Mystery|Thriller
+  - 527: 96.1% | Schindler's List (1993),Drama|War
+  - 904: 90.2% | Rear Window (1954),Mystery|Thriller
+  - 151: 90.1% | Rob Roy (1995),Action|Drama|Romance|War
+  - 1278: 90.1% | Young Frankenstein (1974),Comedy|Fantasy
+
+User ID: 10 | Similaridade Media: 0.44
+  Recommended Movies (MovieID: Score | Title):
+  - 1198: 96.6% | Raiders of the Lost Ark (Indiana Jones and the Raiders of the Lost Ark) (1981),Action|Adventure
+  - 858: 96.2% | Godfather, The (1972)
+  - 47: 94.9% | Seven (a.k.a. Se7en) (1995),Mystery|Thriller
+  - 1270: 90.3% | Back to the Future (1985),Adventure|Comedy|Sci-Fi
+  - 364: 86.7% | Lion King, The (1994)
+
+User ID: 12 | Similaridade Media: 0.46
+  Recommended Movies (MovieID: Score | Title):
+  - 1199: 94.0% | Brazil (1985),Fantasy|Sci-Fi
+  - 1201: 93.3% | Good, the Bad and the Ugly, The (Buono, il brutto, il cattivo, Il) (1966)
+  - 1276: 92.1% | Cool Hand Luke (1967),Drama
+  - 79132: 91.5% | Inception (2010),Action|Crime|Drama|Mystery|Sci-Fi|Thriller|IMAX
+  - 76251: 90.0% | Kick-Ass (2010),Action|Comedy
+
+User ID: 13 | Similaridade Media: 0.52
+  Recommended Movies (MovieID: Score | Title):
+  - 720: 100.0% | Wallace & Gromit: The Best of Aardman Animation (1996),Adventure|Animation|Comedy
+  - 1221: 95.2% | Godfather: Part II, The (1974)
+  - 5954: 95.1% | 25th Hour (2002),Crime|Drama
+  - 98809: 95.1% | Hobbit: An Unexpected Journey, The (2012)
+  - 1259: 95.0% | Stand by Me (1986),Adventure|Drama
+
+User ID: 15 | Similaridade Media: 0.32
+  Recommended Movies (MovieID: Score | Title):
+  - 318: 94.8% | Shawshank Redemption, The (1994)
+  - 1089: 94.1% | Reservoir Dogs (1992),Crime|Mystery|Thriller
+  - 1196: 92.5% | Star Wars: Episode V - The Empire Strikes Back (1980),Action|Adventure|Sci-Fi
+  - 750: 92.3% | Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1964),Comedy|War
+  - 1617: 92.0% | L.A. Confidential (1997),Crime|Film-Noir|Mystery|Thriller
+
+User ID: 18 | Similaridade Media: 0.60
+  Recommended Movies (MovieID: Score | Title):
+  - 953: 100.0% | It's a Wonderful Life (1946),Children|Drama|Fantasy|Romance
+  - 2599: 100.0% | Election (1999),Comedy
+  - 923: 97.5% | Citizen Kane (1941),Drama|Mystery
+  - 8360: 95.1% | Shrek 2 (2004),Adventure|Animation|Children|Comedy|Musical|Romance
+  - 5418: 94.9% | Bourne Identity, The (2002)
+
+User ID: 19 | Similaridade Media: 0.39
+  Recommended Movies (MovieID: Score | Title):
+  - 1203: 89.9% | 12 Angry Men (1957),Drama
+  - 55820: 88.3% | No Country for Old Men (2007),Crime|Drama
+  - 2028: 87.0% | Saving Private Ryan (1998),Action|Drama|War
+  - 164179: 86.8% | Arrival (2016),Sci-Fi
+  - 1261: 86.7% | Evil Dead II (Dead by Dawn) (1987),Action|Comedy|Fantasy|Horror
+
+User ID: 20 | Similaridade Media: 0.35
+  Recommended Movies (MovieID: Score | Title):
+  - 4855: 96.6% | Dirty Harry (1971),Action|Crime|Thriller
+  - 527: 95.0% | Schindler's List (1993),Drama|War
+  - 1198: 93.7% | Raiders of the Lost Ark (Indiana Jones and the Raiders of the Lost Ark) (1981),Action|Adventure
+  - 5618: 93.3% | Spirited Away (Sen to Chihiro no kamikakushi) (2001),Adventure|Animation|Fantasy
+  - 3527: 93.2% | Predator (1987),Action|Sci-Fi|Thriller
+
+User ID: 21 | Similaridade Media: 0.50
+  Recommended Movies (MovieID: Score | Title):
+  - 5971: 97.5% | My Neighbor Totoro (Tonari no Totoro) (1988),Animation|Children|Drama|Fantasy
+  - 3000: 93.8% | Princess Mononoke (Mononoke-hime) (1997),Action|Adventure|Animation|Drama|Fantasy
+  - 111362: 93.3% | X-Men: Days of Future Past (2014),Action|Adventure|Sci-Fi
+  - 152081: 90.1% | Zootopia (2016),Action|Adventure|Animation|Children|Comedy
+  - 81847: 90.1% | Tangled (2010),Animation|Children|Comedy|Fantasy|Musical|Romance|IMAX
+
+User ID: 23 | Similaridade Media: 0.54
+  Recommended Movies (MovieID: Score | Title):
+  - 905: 100.0% | It Happened One Night (1934),Comedy|Romance
+  - 1350: 100.0% | Omen, The (1976)
+  - 1184: 100.0% | Mediterraneo (1991),Comedy|Drama
+  - 1084: 100.0% | Bonnie and Clyde (1967),Crime|Drama
+  - 1262: 100.0% | Great Escape, The (1963)
+
+User ID: 25 | Similaridade Media: 0.68
+  Recommended Movies (MovieID: Score | Title):
+  - 111: 100.0% | Taxi Driver (1976),Crime|Drama|Thriller
+  - 232: 100.0% | Eat Drink Man Woman (Yin shi nan nu) (1994),Comedy|Drama|Romance
+  - 529: 100.0% | Searching for Bobby Fischer (1993),Drama
+  - 515: 92.1% | Remains of the Day, The (1993)
+  - 608: 90.1% | Fargo (1996),Comedy|Crime|Drama|Thriller
+
+User ID: 27 | Similaridade Media: 0.29
+  Recommended Movies (MovieID: Score | Title):
+  - 953: 95.0% | It's a Wonderful Life (1946),Children|Drama|Fantasy|Romance
+  - 1272: 94.9% | Patton (1970),Drama|War
+  - 500: 94.9% | Mrs. Doubtfire (1993),Comedy|Drama
+  - 1193: 94.0% | One Flew Over the Cuckoo's Nest (1975),Drama
+  - 858: 91.8% | Godfather, The (1972)
+
+User ID: 31 | Similaridade Media: 0.49
+  Recommended Movies (MovieID: Score | Title):
+  - 4993: 91.3% | Lord of the Rings: The Fellowship of the Ring, The (2001)
+  - 7153: 90.0% | Lord of the Rings: The Return of the King, The (2003)
+  - 5952: 89.9% | Lord of the Rings: The Two Towers, The (2002)
+  - 79132: 87.4% | Inception (2010),Action|Crime|Drama|Mystery|Sci-Fi|Thriller|IMAX
+  - 4308: 86.5% | Moulin Rouge (2001),Drama|Musical|Romance
+
+User ID: 35 | Similaridade Media: 0.27
+  Recommended Movies (MovieID: Score | Title):
+  - 99114: 95.0% | Django Unchained (2012),Action|Drama|Western
+  - 318: 92.1% | Shawshank Redemption, The (1994)
+  - 527: 90.4% | Schindler's List (1993),Drama|War
+  - 106782: 90.0% | Wolf of Wall Street, The (2013)
+  - 4995: 89.6% | Beautiful Mind, A (2001)
+
+User ID: 36 | Similaridade Media: 0.48
+  Recommended Movies (MovieID: Score | Title):
+  - 1200: 100.0% | Aliens (1986),Action|Adventure|Horror|Sci-Fi
+  - 912: 100.0% | Casablanca (1942),Drama|Romance
+  - 17: 96.2% | Sense and Sensibility (1995),Drama|Romance
+  - 1287: 93.6% | Ben-Hur (1959),Action|Adventure|Drama
+  - 953: 93.6% | It's a Wonderful Life (1946),Children|Drama|Fantasy|Romance
+
+User ID: 37 | Similaridade Media: 0.46
+  Recommended Movies (MovieID: Score | Title):
+  - 48780: 94.1% | Prestige, The (2006)
+  - 778: 92.8% | Trainspotting (1996),Comedy|Crime|Drama
+  - 2542: 92.6% | Lock, Stock & Two Smoking Barrels (1998)
+  - 1206: 92.5% | Clockwork Orange, A (1971)
+  - 27773: 92.4% | Old Boy (2003),Mystery|Thriller
+
+User ID: 38 | Similaridade Media: 0.46
+  Recommended Movies (MovieID: Score | Title):
+  - 134853: 96.7% | Inside Out (2015),Adventure|Animation|Children|Comedy|Drama|Fantasy
+  - 1221: 96.5% | Godfather: Part II, The (1974)
+  - 27773: 96.3% | Old Boy (2003),Mystery|Thriller
+  - 61240: 94.0% | Let the Right One In (Låt den rätte komma in) (2008),Drama|Fantasy|Horror|Romance
+  - 6807: 93.5% | Monty Python's The Meaning of Life (1983),Comedy
+
+User ID: 40 | Similaridade Media: 0.51
+  Recommended Movies (MovieID: Score | Title):
+  - 5618: 92.2% | Spirited Away (Sen to Chihiro no kamikakushi) (2001),Adventure|Animation|Fantasy
+  - 1234: 89.7% | Sting, The (1973)
+  - 33660: 89.6% | Cinderella Man (2005),Drama|Romance
+  - 30707: 89.6% | Million Dollar Baby (2004),Drama
+  - 16: 86.7% | Casino (1995),Crime|Drama
+
+User ID: 41 | Similaridade Media: 0.62
+  Recommended Movies (MovieID: Score | Title):
+  - 3623: 100.0% | Mission: Impossible II (2000),Action|Adventure|Thriller
+  - 1218: 100.0% | Killer, The (Die xue shuang xiong) (1989)
+  - 3578: 100.0% | Gladiator (2000),Action|Adventure|Drama
+  - 3654: 90.5% | Guns of Navarone, The (1961)
+  - 3107: 90.4% | Backdraft (1991),Action|Drama
+
+User ID: 43 | Similaridade Media: 0.60
+  Recommended Movies (MovieID: Score | Title):
+  - 1203: 100.0% | 12 Angry Men (1957),Drama
+  - 5291: 94.9% | Rashomon (Rashômon) (1950),Crime|Drama|Mystery
+  - 2804: 93.3% | Christmas Story, A (1983)
+  - 59315: 90.0% | Iron Man (2008),Action|Adventure|Sci-Fi
+  - 49530: 90.0% | Blood Diamond (2006),Action|Adventure|Crime|Drama|Thriller|War
+
+User ID: 44 | Similaridade Media: 0.33
+  Recommended Movies (MovieID: Score | Title):
+  - 33493: 100.0% | Star Wars: Episode III - Revenge of the Sith (2005),Action|Adventure|Sci-Fi
+  - 115617: 100.0% | Big Hero 6 (2014),Action|Animation|Comedy
+  - 89745: 97.3% | Avengers, The (2012)
+  - 44191: 97.2% | V for Vendetta (2006),Action|Sci-Fi|Thriller|IMAX
+  - 102445: 96.5% | Star Trek Into Darkness (2013),Action|Adventure|Sci-Fi|IMAX
+
+User ID: 46 | Similaridade Media: 0.29
+  Recommended Movies (MovieID: Score | Title):
+  - 7153: 92.0% | Lord of the Rings: The Return of the King, The (2003)
+  - 1198: 91.0% | Raiders of the Lost Ark (Indiana Jones and the Raiders of the Lost Ark) (1981),Action|Adventure
+  - 858: 89.9% | Godfather, The (1972)
+  - 1207: 88.9% | To Kill a Mockingbird (1962),Drama
+  - 4993: 88.6% | Lord of the Rings: The Fellowship of the Ring, The (2001)
+
+User ID: 47 | Similaridade Media: 0.52
+  Recommended Movies (MovieID: Score | Title):
+  - 594: 100.0% | Snow White and the Seven Dwarfs (1937),Animation|Children|Drama|Fantasy|Musical
+  - 29: 100.0% | City of Lost Children, The (Cité des enfants perdus, La) (1995)
+  - 446: 100.0% | Farewell My Concubine (Ba wang bie ji) (1993),Drama|Romance
+  - 82: 93.1% | Antonia's Line (Antonia) (1995),Comedy|Drama
+  - 593: 91.6% | Silence of the Lambs, The (1991)
+
+User ID: 50 | Similaridade Media: 0.33
+  Recommended Movies (MovieID: Score | Title):
+  - 40819: 93.4% | Walk the Line (2005),Drama|Musical|Romance
+  - 4011: 90.2% | Snatch (2000),Comedy|Crime|Thriller
+  - 912: 90.2% | Casablanca (1942),Drama|Romance
+  - 51662: 89.9% | 300 (2007),Action|Fantasy|War|IMAX
+  - 33166: 88.6% | Crash (2004),Crime|Drama
+
+User ID: 55 | Similaridade Media: 0.20
+  Recommended Movies (MovieID: Score | Title):
+  - 858: 88.4% | Godfather, The (1972)
+  - 306: 86.0% | Three Colors: Red (Trois couleurs: Rouge) (1994),Drama
+  - 308: 84.2% | Three Colors: White (Trzy kolory: Bialy) (1994),Comedy|Drama
+  - 5147: 82.4% | Wild Strawberries (Smultronstället) (1957),Drama
+  - 356: 81.9% | Forrest Gump (1994),Comedy|Drama|Romance|War
+
+User ID: 57 | Similaridade Media: 0.42
+  Recommended Movies (MovieID: Score | Title):
+  - 2324: 96.7% | Life Is Beautiful (La Vita è bella) (1997),Comedy|Drama|Romance|War
+  - 66934: 95.9% | Dr. Horrible's Sing-Along Blog (2008),Comedy|Drama|Musical|Sci-Fi
+  - 1221: 95.0% | Godfather: Part II, The (1974)
+  - 1079: 95.0% | Fish Called Wanda, A (1988)
+  - 50: 94.4% | Usual Suspects, The (1995)
+
+User ID: 58 | Similaridade Media: 0.35
+  Recommended Movies (MovieID: Score | Title):
+  - 950: 96.7% | Thin Man, The (1934)
+  - 608: 96.0% | Fargo (1996),Comedy|Crime|Drama|Thriller
+  - 1253: 95.9% | Day the Earth Stood Still, The (1951)
+  - 920: 93.5% | Gone with the Wind (1939),Drama|Romance|War
+  - 1148: 93.2% | Wallace & Gromit: The Wrong Trousers (1993),Animation|Children|Comedy|Crime
+
+User ID: 59 | Similaridade Media: 0.40
+  Recommended Movies (MovieID: Score | Title):
+  - 6016: 93.2% | City of God (Cidade de Deus) (2002),Action|Adventure|Crime|Drama|Thriller
+  - 1084: 90.0% | Bonnie and Clyde (1967),Crime|Drama
+  - 3435: 89.8% | Double Indemnity (1944),Crime|Drama|Film-Noir
+  - 866: 86.8% | Bound (1996),Crime|Drama|Romance|Thriller
+  - 3088: 86.6% | Harvey (1950),Comedy|Fantasy
+
+User ID: 60 | Similaridade Media: 0.31
+  Recommended Movies (MovieID: Score | Title):
+  - 1244: 100.0% | Manhattan (1979),Comedy|Drama|Romance
+  - 1394: 96.0% | Raising Arizona (1987),Comedy
+  - 1230: 95.9% | Annie Hall (1977),Comedy|Romance
+  - 1221: 95.1% | Godfather: Part II, The (1974)
+  - 1077: 94.9% | Sleeper (1973),Comedy|Sci-Fi
+
+User ID: 61 | Similaridade Media: 0.40
+  Recommended Movies (MovieID: Score | Title):
+  - 1221: 100.0% | Godfather: Part II, The (1974)
+  - 2692: 97.5% | Run Lola Run (Lola rennt) (1998),Action|Crime
+  - 593: 97.2% | Silence of the Lambs, The (1991)
+  - 1617: 96.6% | L.A. Confidential (1997),Crime|Film-Noir|Mystery|Thriller
+  - 900: 95.8% | American in Paris, An (1951)
+
+User ID: 62 | Similaridade Media: 0.39
+  Recommended Movies (MovieID: Score | Title):
+  - 1234: 93.3% | Sting, The (1973)
+  - 4262: 93.3% | Scarface (1983),Action|Crime|Drama
+  - 318: 93.1% | Shawshank Redemption, The (1994)
+  - 8132: 92.8% | Gladiator (1992),Action|Drama
+  - 44555: 92.5% | Lives of Others, The (Das leben der Anderen) (2006)
+
+User ID: 64 | Similaridade Media: 0.57
+  Recommended Movies (MovieID: Score | Title):
+  - 2324: 100.0% | Life Is Beautiful (La Vita è bella) (1997),Comedy|Drama|Romance|War
+  - 2019: 100.0% | Seven Samurai (Shichinin no samurai) (1954),Action|Adventure|Drama
+  - 1213: 95.0% | Goodfellas (1990),Crime|Drama
+  - 3147: 93.4% | Green Mile, The (1999)
+  - 5995: 93.3% | Pianist, The (2002)
+
+User ID: 66 | Similaridade Media: 0.29
+  Recommended Movies (MovieID: Score | Title):
+  - 8784: 95.0% | Garden State (2004),Comedy|Drama|Romance
+  - 919: 91.5% | Wizard of Oz, The (1939)
+  - 2571: 90.1% | Matrix, The (1999)
+  - 3897: 88.2% | Almost Famous (2000),Drama
+  - 8636: 86.8% | Spider-Man 2 (2004),Action|Adventure|Sci-Fi|IMAX
+
+User ID: 67 | Similaridade Media: 0.39
+  Recommended Movies (MovieID: Score | Title):
+  - 527: 100.0% | Schindler's List (1993),Drama|War
+  - 2355: 100.0% | Bug's Life, A (1998)
+  - 1198: 100.0% | Raiders of the Lost Ark (Indiana Jones and the Raiders of the Lost Ark) (1981),Action|Adventure
+  - 1196: 97.6% | Star Wars: Episode V - The Empire Strikes Back (1980),Action|Adventure|Sci-Fi
+  - 1197: 97.2% | Princess Bride, The (1987)
+
+User ID: 69 | Similaridade Media: 0.55
+  Recommended Movies (MovieID: Score | Title):
+  - 318: 97.0% | Shawshank Redemption, The (1994)
+  - 1080: 96.7% | Monty Python's Life of Brian (1979),Comedy
+  - 1221: 96.6% | Godfather: Part II, The (1974)
+  - 57669: 95.1% | In Bruges (2008),Comedy|Crime|Drama|Thriller
+  - 1201: 95.0% | Good, the Bad and the Ugly, The (Buono, il brutto, il cattivo, Il) (1966)
+
+User ID: 70 | Similaridade Media: 0.53
+  Recommended Movies (MovieID: Score | Title):
+  - 778: 100.0% | Trainspotting (1996),Comedy|Crime|Drama
+  - 1080: 100.0% | Monty Python's Life of Brian (1979),Comedy
+  - 2959: 97.1% | Fight Club (1999),Action|Crime|Drama|Thriller
+  - 2324: 93.4% | Life Is Beautiful (La Vita è bella) (1997),Comedy|Drama|Romance|War
+  - 1222: 92.3% | Full Metal Jacket (1987),Drama|War
+
+User ID: 72 | Similaridade Media: 0.56
+  Recommended Movies (MovieID: Score | Title):
+  - 4973: 100.0% | Amelie (Fabuleux destin d'Amélie Poulain, Le) (2001)
+  - 965: 100.0% | 39 Steps, The (1935)
+  - 4211: 100.0% | Reversal of Fortune (1990),Drama
+  - 1594: 100.0% | In the Company of Men (1997),Comedy|Drama
+  - 2946: 100.0% | Help! (1965),Comedy|Musical
+
+User ID: 75 | Similaridade Media: 0.42
+  Recommended Movies (MovieID: Score | Title):
+  - 2019: 93.4% | Seven Samurai (Shichinin no samurai) (1954),Action|Adventure|Drama
+  - 6787: 93.3% | All the President's Men (1976),Drama|Thriller
+  - 1204: 88.4% | Lawrence of Arabia (1962),Adventure|Drama|War
+  - 1221: 87.7% | Godfather: Part II, The (1974)
+  - 92259: 87.4% | Intouchables (2011),Comedy|Drama
+
+User ID: 76 | Similaridade Media: 0.33
+  Recommended Movies (MovieID: Score | Title):
+  - 7371: 100.0% | Dogville (2003),Drama|Mystery|Thriller
+  - 1252: 92.6% | Chinatown (1974),Crime|Film-Noir|Mystery|Thriller
+  - 2019: 92.0% | Seven Samurai (Shichinin no samurai) (1954),Action|Adventure|Drama
+  - 2858: 91.0% | American Beauty (1999),Drama|Romance
+  - 6016: 90.1% | City of God (Cidade de Deus) (2002),Action|Adventure|Crime|Drama|Thriller
+
+User ID: 78 | Similaridade Media: 0.24
+  Recommended Movies (MovieID: Score | Title):
+  - 296: 91.5% | Pulp Fiction (1994),Comedy|Crime|Drama|Thriller
+  - 7153: 90.4% | Lord of the Rings: The Return of the King, The (2003)
+  - 152081: 90.3% | Zootopia (2016),Action|Adventure|Animation|Children|Comedy
+  - 2081: 88.8% | Little Mermaid, The (1989)
+
+User ID: 80 | Similaridade Media: 0.52
+  Recommended Movies (MovieID: Score | Title):
+  - 4993: 100.0% | Lord of the Rings: The Fellowship of the Ring, The (2001)
+  - 449: 100.0% | Fear of a Black Hat (1994),Comedy
+  - 553: 96.1% | Tombstone (1993),Action|Drama|Western
+  - 4223: 93.4% | Enemy at the Gates (2001),Drama|War
+  - 3000: 92.9% | Princess Mononoke (Mononoke-hime) (1997),Action|Adventure|Animation|Drama|Fantasy
+
+User ID: 82 | Similaridade Media: 0.30
+  Recommended Movies (MovieID: Score | Title):
+  - 1203: 94.1% | 12 Angry Men (1957),Drama
+  - 750: 94.0% | Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb (1964),Comedy|War
+  - 858: 93.5% | Godfather, The (1972)
+  - 3910: 93.0% | Dancer in the Dark (2000),Drama|Musical
+  - 1221: 91.4% | Godfather: Part II, The (1974)
+
+User ID: 84 | Similaridade Media: 0.38
+  Recommended Movies (MovieID: Score | Title):
+  - 1244: 93.4% | Manhattan (1979),Comedy|Drama|Romance
+  - 1203: 93.3% | 12 Angry Men (1957),Drama
+  - 1247: 93.2% | Graduate, The (1967)
+  - 6016: 91.0% | City of God (Cidade de Deus) (2002),Action|Adventure|Crime|Drama|Thriller
+  - 31658: 89.6% | Howl's Moving Castle (Hauru no ugoku shiro) (2004),Adventure|Animation|Fantasy|Romance
+
+User ID: 85 | Similaridade Media: 0.50
+  Recommended Movies (MovieID: Score | Title):
+  - 318: 100.0% | Shawshank Redemption, The (1994)
+  - 62: 94.9% | Mr. Holland's Opus (1995),Drama
+  - 531: 93.3% | Secret Garden, The (1993)
+  - 46: 93.2% | How to Make an American Quilt (1995),Drama|Romance
+  - 543: 90.2% | So I Married an Axe Murderer (1993),Comedy|Romance|Thriller
+
