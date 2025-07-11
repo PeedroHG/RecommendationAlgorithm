@@ -23,7 +23,7 @@ int main() {
     auto program_start_time = std::chrono::high_resolution_clock::now();
 
     #ifdef _OPENMP
-        std::cout << "OpenMP está ATIVADO. Número máximo de threads: " << omp_get_max_threads() << std::endl;
+        std::cout << "OpenMP está ATIVADO. Número máximo de threads: " << omp_get_max_threads() -  1 << std::endl;
     #else
         std::cout << "OpenMP NÃO está ativado/disponível." << std::endl;
     #endif
@@ -58,9 +58,9 @@ int main() {
     std::cout << "Filtered dataset contains " << filtered_users_ratings.size() << " users." << std::endl;
 
     std::cout << "Writing filtered dataset to: " << FILTERED_DATASET_PATH << std::endl;
-    writeFilteredRatingsToFile(FILTERED_DATASET_PATH, filtered_users_ratings);
+    //writeFilteredRatingsToFile(FILTERED_DATASET_PATH, filtered_users_ratings);
 
-    std::cout << "Writing random users to explore to: " << EXPLORE_USERS_PATH << std::endl;
+    //std::cout << "Writing random users to explore to: " << EXPLORE_USERS_PATH << std::endl;
     //writeRandomUserIdsToExplore(filtered_users_ratings, NUM_RANDOM_USERS_TO_EXPLORE, EXPLORE_USERS_PATH);
 
     auto phase_end_time = std::chrono::high_resolution_clock::now();

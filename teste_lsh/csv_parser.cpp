@@ -9,6 +9,9 @@
 #include <charconv>
 #include <unordered_set>
 #include <unordered_map>
+#include <charconv>
+#include <format> 
+#include <omp.h>
 
 MovieTitlesMap readMovieTitles(const std::string& movies_csv_path) {
     MovieTitlesMap movie_titles;
@@ -163,32 +166,95 @@ void filterUserRatingsLog(UserRatingsLog& users_ratings_log,
 void writeFilteredRatingsToFile(const std::string& output_path, const UserRatingsLog& users_ratings_log) {
     std::ofstream outFile(output_path, std::ios::out | std::ios::binary);
     if (!outFile.is_open()) {
-        std::cerr << "Error: Could not open output file for filtered data: " << output_path << std::endl;
+        std::cerr << "Error: Could not open output file: " << output_path << std::endl;
         return;
     }
 
-    std::string output_buffer;
-    output_buffer.reserve(300 * 1024 * 1024); // ajuste conforme necessário
+    // Paralelização thread-safe: cada thread monta seu próprio buffer
+    const size_t num_users = users_ratings_log.size();
+    std::vector<const std::pair<const int, std::vector<std::pair<int, float>>>*> user_ptrs;
+    user_ptrs.reserve(num_users);
+    for (const auto& entry : users_ratings_log) user_ptrs.push_back(&entry);
 
-    char rating_str[16]; // buffer temporário para rating formatado
-    for (const auto& [user_id, ratings] : users_ratings_log) {
-        if (ratings.empty()) continue;
+    int num_threads = 1;
+#ifdef _OPENMP
+    num_threads = omp_get_max_threads();
+#endif
+    std::vector<std::string> thread_buffers(num_threads);
 
-        output_buffer.append(std::to_string(user_id));
-        for (const auto& [movie_id, rating] : ratings) {
-            output_buffer.push_back(' ');
-            output_buffer.append(std::to_string(movie_id));
-            output_buffer.push_back(':');
+#pragma omp parallel num_threads(num_threads)
+    {
+        int tid = 0;
+#ifdef _OPENMP
+        tid = omp_get_thread_num();
+#endif
+        std::string& local_buffer = thread_buffers[tid];
+        char temp_buffer[64];
 
-            // converte float com precisão fixa (1 casas decimais)
-            std::snprintf(rating_str, sizeof(rating_str), "%.1f", rating);
-            output_buffer.append(rating_str);
+#pragma omp for schedule(static)
+        for (size_t idx = 0; idx < num_users; ++idx) {
+            const auto& user_entry = *user_ptrs[idx];
+            int user_id = user_entry.first;
+            const auto& ratings = user_entry.second;
+            if (ratings.empty()) continue;
+
+            // Converte user_id
+            auto [ptr1, ec1] = std::to_chars(temp_buffer, temp_buffer + sizeof(temp_buffer), user_id);
+            if (ec1 == std::errc()) {
+                local_buffer.append(temp_buffer, ptr1);
+            }
+
+            for (const auto& [movie_id, rating] : ratings) {
+                local_buffer.push_back(' ');
+                auto [ptr2, ec2] = std::to_chars(temp_buffer, temp_buffer + sizeof(temp_buffer), movie_id);
+                if (ec2 == std::errc()) {
+                    local_buffer.append(temp_buffer, ptr2);
+                }
+                local_buffer.push_back(':');
+                auto [ptr3, ec3] = std::to_chars(temp_buffer, temp_buffer + sizeof(temp_buffer), rating, std::chars_format::fixed, 1);
+                if (ec3 == std::errc()) {
+                    local_buffer.append(temp_buffer, ptr3);
+                }
+            }
+            local_buffer.push_back('\n');
         }
-        output_buffer.push_back('\n');
     }
+
+    // Junta todos os buffers das threads em ordem
+    std::string output_buffer;
+    size_t total_size = 0;
+    for (const auto& buf : thread_buffers) total_size += buf.size();
+    output_buffer.reserve(total_size);
+    for (const auto& buf : thread_buffers) output_buffer.append(buf);
 
     outFile.write(output_buffer.data(), output_buffer.size());
 }
+
+// void writeFilteredRatingsToFile(const std::string& output_path, const UserRatingsLog& users_ratings_log) {
+//     std::ofstream outFile(output_path, std::ios::out | std::ios::binary);
+//     if (!outFile.is_open()) {
+//         std::cerr << "Error: Could not open output file for filtered data: " << output_path << std::endl;
+//         return;
+//     }
+
+//     std::string output_buffer;
+//     output_buffer.reserve(300 * 1024 * 1024); // Boa prática mantida
+
+//     for (const auto& [user_id, ratings] : users_ratings_log) {
+//         if (ratings.empty()) continue;
+
+//         // Formata o ID do usuário e adiciona ao buffer
+//         std::format_to(std::back_inserter(output_buffer), "{}", user_id);
+
+//         for (const auto& [movie_id, rating] : ratings) {
+//             // Formata " movie_id:rating" diretamente no final do buffer
+//             std::format_to(std::back_inserter(output_buffer), " {}:{:0.1f}", movie_id, rating);
+//         }
+//         output_buffer.push_back('\n');
+//     }
+
+//     outFile.write(output_buffer.data(), output_buffer.size());
+// }
 
 void writeRandomUserIdsToExplore(const UserRatingsLog& users_ratings_log,
                                  size_t num_users_to_select,
