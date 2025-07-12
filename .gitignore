@@ -1,4 +1,16 @@
+# Pastas de dados
 datasets/
 dataset/
-teste/filtered_dataset.dat
-teste_lsh/filtered_dataset.dat
+
+# Arquivos de dados e de saída gerados
+*.dat
+
+# Pasta de teste
+src_teste/
+
+# Pasta de Build e arquivos de objeto
+build/
+*.o
+
+# Executáveis
+recommender
