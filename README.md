@@ -1,8 +1,3 @@
----
-title: "\U0001F3A5 Movie Recommendation Algorithm"
-
----
-
 # 🎥 Movie Recommendation Algorithm 
 
 <details>
